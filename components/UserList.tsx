@@ -12,12 +12,13 @@ interface UserListProps {
 }
 
 const UserList: React.FC<UserListProps> = ({ users }) => {
-  const [activatedUserIds, setActivatedUserIds] = useState<number[]>(
-    users.map((user) => user.id)
-  ); //add all the user on list initially
+  const [activatedUserIds, setActivatedUserIds] = useState<number[]>([]);
+  const [searchedUsers, setSearchedUsers] = useState<number[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
 
+  console.log(searchedUsers);
+  console.log(users.map((user) => user.id));
   // Load cached activatedUserIds, imageCache from localStorage on initial render
   useEffect(() => {
     const cachedActivatedUserIds = localStorage.getItem("activatedUserIds");
@@ -25,13 +26,16 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
 
     if (cachedActivatedUserIds) {
       setActivatedUserIds(JSON.parse(cachedActivatedUserIds));
+    } else {
+      setActivatedUserIds(users.map((user) => user.id));
     }
 
     if (cachedImageCache) {
       setImageCache(JSON.parse(cachedImageCache));
     }
-  }, []);
 
+    setSearchedUsers(users.map((user) => user.id));
+  }, []);
 
   const toggleUserActivation = (userId: number, userName: string) => {
     const updatedUserIds = activatedUserIds.includes(userId)
@@ -54,6 +58,13 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
     }
   };
 
+  const handleChange = (value: string) => {
+    const filteredUsers = users.filter((user) =>
+      user.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setSearchedUsers(filteredUsers.map((user) => user.id));
+  };
+
   return (
     <div className="items-center w-full flex justify-center flex-col">
       <div className="flex justify-between mb-8 bg-white w-full px-28 pt-4 align-middle">
@@ -67,6 +78,9 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
               type="text"
               placeholder="Search for users..."
               className="rounded pl-4 py-2 w-52 focus:outline-none focus:bg-white transition duration-300"
+              onChange={(e) => {
+                handleChange(e.target.value);
+              }}
             />
           </div>
           <button className="bg-blue-400 rounded px-4 py-2 ml-2 hover:bg-blue-500 transition duration-300">
@@ -79,7 +93,8 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
         <ul>
           {users.map(
             (user) =>
-              activatedUserIds.includes(user.id) && (
+              activatedUserIds.includes(user.id) &&
+              searchedUsers.includes(user.id) && (
                 <li
                   key={user.id}
                   className={`p-2 flex justify-between cursor-pointer hover:bg-gray-200`}
@@ -92,7 +107,8 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
           )}
           {users.map(
             (user) =>
-              !activatedUserIds.includes(user.id) && (
+              !activatedUserIds.includes(user.id) &&
+              searchedUsers.includes(user.id) && (
                 <li
                   key={user.id}
                   className={`p-2 flex justify-between cursor-pointer hover:bg-gray-200`}
