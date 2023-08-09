@@ -27,7 +27,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ users }) => {
           groupChartInstanceRef.current.destroy();
         }
 
-        const activeUsers = users.filter((user) => user.isActive).length;
+        const cachedActivatedUserIds = localStorage.getItem("activatedUserIds")
+        const activeUsers = cachedActivatedUserIds ? JSON.parse(cachedActivatedUserIds).length : users.length;
         const disabledUsers = users.length - activeUsers;
 
         userChartInstanceRef.current = new Chart(userCtx, {
