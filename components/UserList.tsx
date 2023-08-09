@@ -13,14 +13,20 @@ interface UserListProps {
 
 const UserList: React.FC<UserListProps> = ({ users }) => {
   const [activatedUserIds, setActivatedUserIds] = useState<number[]>([]);
-  const [searchedUsers, setSearchedUsers] = useState<number[]>([]);
+  const [searchedUsers, setSearchedUsers] = useState<number[]>(
+    users.map((user) => user.id)
+  );
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
 
-  console.log(searchedUsers);
-  console.log(users.map((user) => user.id));
   // Load cached activatedUserIds, imageCache from localStorage on initial render
+
   useEffect(() => {
+    setSearchedUsers(users.map((user) => user.id));
+  }, [users]);
+
+  useEffect(() => {
+    setSearchedUsers(users.map((user) => user.id));
     const cachedActivatedUserIds = localStorage.getItem("activatedUserIds");
     const cachedImageCache = localStorage.getItem("imageCache");
 
@@ -33,8 +39,6 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
     if (cachedImageCache) {
       setImageCache(JSON.parse(cachedImageCache));
     }
-
-    setSearchedUsers(users.map((user) => user.id));
   }, []);
 
   const toggleUserActivation = (userId: number, userName: string) => {
@@ -104,6 +108,11 @@ const UserList: React.FC<UserListProps> = ({ users }) => {
                   <FaToggleOff className="text-gray-800 text-2xl font-normal" />
                 </li>
               )
+          )}
+          {searchedUsers.length === 0 && (
+            <li className="p-2 flex justify-between cursor-pointer opacity-40">
+              <p>No users found</p>
+            </li>
           )}
           {users.map(
             (user) =>
